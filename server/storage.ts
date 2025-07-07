@@ -6,6 +6,8 @@ import {
   type Customer, type InsertCustomer, type Sale, type InsertSale,
   type OrderItem, type DashboardStats
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, gte, lte, count, sum, desc } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -449,4 +451,246 @@ export class MemStorage implements IStorage {
   }
 }
 
+// Database Storage Implementation
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async getMenuItems(): Promise<MenuItem[]> {
+    return await db.select().from(menuItems);
+  }
+
+  async getMenuItem(id: number): Promise<MenuItem | undefined> {
+    const [item] = await db.select().from(menuItems).where(eq(menuItems.id, id));
+    return item || undefined;
+  }
+
+  async createMenuItem(item: InsertMenuItem): Promise<MenuItem> {
+    const [menuItem] = await db.insert(menuItems).values(item).returning();
+    return menuItem;
+  }
+
+  async updateMenuItem(id: number, updates: Partial<MenuItem>): Promise<MenuItem | undefined> {
+    const [updated] = await db.update(menuItems).set(updates).where(eq(menuItems.id, id)).returning();
+    return updated || undefined;
+  }
+
+  async deleteMenuItem(id: number): Promise<boolean> {
+    const result = await db.delete(menuItems).where(eq(menuItems.id, id));
+    return (result as any).rowCount > 0;
+  }
+
+  async getTables(): Promise<Table[]> {
+    return await db.select().from(tables);
+  }
+
+  async getTable(id: number): Promise<Table | undefined> {
+    const [table] = await db.select().from(tables).where(eq(tables.id, id));
+    return table || undefined;
+  }
+
+  async createTable(table: InsertTable): Promise<Table> {
+    const [newTable] = await db.insert(tables).values(table).returning();
+    return newTable;
+  }
+
+  async updateTable(id: number, updates: Partial<Table>): Promise<Table | undefined> {
+    const [updated] = await db.update(tables).set(updates).where(eq(tables.id, id)).returning();
+    return updated || undefined;
+  }
+
+  async deleteTable(id: number): Promise<boolean> {
+    const result = await db.delete(tables).where(eq(tables.id, id));
+    return (result as any).rowCount > 0;
+  }
+
+  async getOrders(): Promise<Order[]> {
+    return await db.select().from(orders).orderBy(desc(orders.createdAt));
+  }
+
+  async getOrder(id: number): Promise<Order | undefined> {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    return order || undefined;
+  }
+
+  async getOrdersByStatus(status: string): Promise<Order[]> {
+    return await db.select().from(orders).where(eq(orders.status, status));
+  }
+
+  async createOrder(order: InsertOrder): Promise<Order> {
+    const [newOrder] = await db.insert(orders).values(order).returning();
+    return newOrder;
+  }
+
+  async updateOrder(id: number, updates: Partial<Order>): Promise<Order | undefined> {
+    const [updated] = await db.update(orders).set(updates).where(eq(orders.id, id)).returning();
+    return updated || undefined;
+  }
+
+  async deleteOrder(id: number): Promise<boolean> {
+    const result = await db.delete(orders).where(eq(orders.id, id));
+    return (result as any).rowCount > 0;
+  }
+
+  async getInventory(): Promise<Inventory[]> {
+    return await db.select().from(inventory);
+  }
+
+  async getInventoryItem(id: number): Promise<Inventory | undefined> {
+    const [item] = await db.select().from(inventory).where(eq(inventory.id, id));
+    return item || undefined;
+  }
+
+  async createInventoryItem(item: InsertInventory): Promise<Inventory> {
+    const [newItem] = await db.insert(inventory).values(item).returning();
+    return newItem;
+  }
+
+  async updateInventoryItem(id: number, updates: Partial<Inventory>): Promise<Inventory | undefined> {
+    const [updated] = await db.update(inventory).set(updates).where(eq(inventory.id, id)).returning();
+    return updated || undefined;
+  }
+
+  async deleteInventoryItem(id: number): Promise<boolean> {
+    const result = await db.delete(inventory).where(eq(inventory.id, id));
+    return (result as any).rowCount > 0;
+  }
+
+  async getLowStockItems(): Promise<Inventory[]> {
+    return await db.select().from(inventory).where(eq(inventory.lowStock, true));
+  }
+
+  async getStaff(): Promise<Staff[]> {
+    return await db.select().from(staff);
+  }
+
+  async getStaffMember(id: number): Promise<Staff | undefined> {
+    const [member] = await db.select().from(staff).where(eq(staff.id, id));
+    return member || undefined;
+  }
+
+  async createStaffMember(staffMember: InsertStaff): Promise<Staff> {
+    const [newStaff] = await db.insert(staff).values(staffMember).returning();
+    return newStaff;
+  }
+
+  async updateStaffMember(id: number, updates: Partial<Staff>): Promise<Staff | undefined> {
+    const [updated] = await db.update(staff).set(updates).where(eq(staff.id, id)).returning();
+    return updated || undefined;
+  }
+
+  async deleteStaffMember(id: number): Promise<boolean> {
+    const result = await db.delete(staff).where(eq(staff.id, id));
+    return (result as any).rowCount > 0;
+  }
+
+  async getCustomers(): Promise<Customer[]> {
+    return await db.select().from(customers);
+  }
+
+  async getCustomer(id: number): Promise<Customer | undefined> {
+    const [customer] = await db.select().from(customers).where(eq(customers.id, id));
+    return customer || undefined;
+  }
+
+  async createCustomer(customer: InsertCustomer): Promise<Customer> {
+    const [newCustomer] = await db.insert(customers).values(customer).returning();
+    return newCustomer;
+  }
+
+  async updateCustomer(id: number, updates: Partial<Customer>): Promise<Customer | undefined> {
+    const [updated] = await db.update(customers).set(updates).where(eq(customers.id, id)).returning();
+    return updated || undefined;
+  }
+
+  async deleteCustomer(id: number): Promise<boolean> {
+    const result = await db.delete(customers).where(eq(customers.id, id));
+    return (result as any).rowCount > 0;
+  }
+
+  async getSales(): Promise<Sale[]> {
+    return await db.select().from(sales).orderBy(desc(sales.date));
+  }
+
+  async getSalesByDateRange(startDate: Date, endDate: Date): Promise<Sale[]> {
+    return await db.select().from(sales).where(
+      and(
+        gte(sales.date, startDate),
+        lte(sales.date, endDate)
+      )
+    );
+  }
+
+  async createSale(sale: InsertSale): Promise<Sale> {
+    const [newSale] = await db.insert(sales).values(sale).returning();
+    return newSale;
+  }
+
+  async getDashboardStats(): Promise<DashboardStats> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    // Get daily sales
+    const dailySales = await db.select({ 
+      amount: sales.amount 
+    }).from(sales).where(
+      and(
+        gte(sales.date, today),
+        lte(sales.date, tomorrow)
+      )
+    );
+
+    const dailyRevenue = dailySales.reduce((sum, sale) => sum + parseFloat(sale.amount), 0);
+
+    // Active orders
+    const pendingOrders = await db.select({ 
+      count: count() 
+    }).from(orders).where(eq(orders.status, "pending"));
+    
+    const preparingOrders = await db.select({ 
+      count: count() 
+    }).from(orders).where(eq(orders.status, "preparing"));
+
+    // Table stats
+    const allTables = await db.select().from(tables);
+    const occupiedTables = allTables.filter(table => table.status === "occupied").length;
+    const totalTables = allTables.length;
+
+    // Staff stats
+    const allStaff = await db.select().from(staff);
+    const staffPresent = allStaff.filter(member => member.status === "active").length;
+    const totalStaff = allStaff.length;
+
+    // Low stock items
+    const lowStockItems = await db.select({ 
+      count: count() 
+    }).from(inventory).where(eq(inventory.lowStock, true));
+
+    return {
+      dailyRevenue,
+      activeOrders: (pendingOrders[0]?.count || 0) + (preparingOrders[0]?.count || 0),
+      occupiedTables,
+      totalTables,
+      staffPresent,
+      totalStaff,
+      lowStockItems: lowStockItems[0]?.count || 0,
+    };
+  }
+}
+
+// Use MemStorage for now (will switch to DatabaseStorage in Vercel)
 export const storage = new MemStorage();

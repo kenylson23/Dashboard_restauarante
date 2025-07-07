@@ -1,0 +1,14 @@
+server/
+node_modules/
+.git/
+*.log
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+dist/
+.replit
+.replit.nix
+replit.nix
+.gitignore
