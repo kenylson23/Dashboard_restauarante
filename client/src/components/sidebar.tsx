@@ -41,18 +41,18 @@ export function Sidebar() {
           const isActive = location === item.href;
           
           return (
-            <Link key={item.name} href={item.href}>
-              <a
-                className={cn(
-                  "flex items-center px-6 py-3 text-sm font-medium transition-colors",
-                  isActive
-                    ? "text-primary bg-blue-50 border-r-4 border-primary"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-                )}
-              >
-                <Icon className="mr-3" size={20} />
-                {item.name}
-              </a>
+            <Link 
+              key={item.name} 
+              href={item.href}
+              className={cn(
+                "flex items-center px-6 py-3 text-sm font-medium transition-colors",
+                isActive
+                  ? "text-primary bg-blue-50 border-r-4 border-primary"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+              )}
+            >
+              <Icon className="mr-3" size={20} />
+              {item.name}
             </Link>
           );
         })}
