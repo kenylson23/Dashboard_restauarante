@@ -5,8 +5,9 @@ import {
   type Inventory, type InsertInventory, type Staff, type InsertStaff,
   type Customer, type InsertCustomer, type Sale, type InsertSale,
   type OrderItem, type DashboardStats
-} from "@shared/schema";
+} from "../shared/schema";
 import { eq, and, gte, lte, count, sum, desc } from "drizzle-orm";
+import { db } from "./db";
 
 export interface IStorage {
   // User methods
@@ -453,9 +454,13 @@ export class MemStorage implements IStorage {
 // Database Storage Implementation
 export class DatabaseStorage implements IStorage {
   private getDb() {
-    // Only import database when actually needed
-    const { db } = require("./db");
-    return db;
+    try {
+      // Import database at the top level instead of dynamically
+      return db;
+    } catch (error) {
+      console.error('Error accessing database:', error);
+      throw error;
+    }
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -569,8 +574,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getInventory(): Promise<Inventory[]> {
-    const db = this.getDb();
-    return await db.select().from(inventory);
+    try {
+      const db = this.getDb();
+      console.log('Getting inventory from database...');
+      const result = await db.select().from(inventory);
+      console.log('Inventory result:', result.length, 'items');
+      return result;
+    } catch (error) {
+      console.error('Error getting inventory:', error);
+      throw error;
+    }
   }
 
   async getInventoryItem(id: number): Promise<Inventory | undefined> {
@@ -737,4 +750,4 @@ export class DatabaseStorage implements IStorage {
 }
 
 // Use MemStorage for development, DatabaseStorage for production (independent of Replit)
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();

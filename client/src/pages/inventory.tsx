@@ -13,7 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Progress } from "@/components/ui/progress";
 import { Plus, Search, Filter, Edit, Trash2, AlertTriangle, Package, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { apiRequest } from "../lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 

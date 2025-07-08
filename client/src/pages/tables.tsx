@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TableGrid } from "../components/table-grid";
+import { TableGrid } from "@/components/table-grid";
 import { Plus, Search, Filter, Users, Armchair, Clock, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { apiRequest } from "../lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export default function TablesPage() {

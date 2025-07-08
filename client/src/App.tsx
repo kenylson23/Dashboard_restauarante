@@ -1,18 +1,18 @@
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-// import { Toaster } from "@/components/ui/toaster";
-// import { TooltipProvider } from "@/components/ui/tooltip";
-import { Layout } from "./components/layout";
-import Dashboard from "./pages/dashboard";
-import OrdersPage from "./pages/orders";
-import TablesPage from "./pages/tables";
-import MenuPage from "./pages/menu";
-import InventoryPage from "./pages/inventory";
-import Reports from "./pages/reports";
-import StaffPage from "./pages/staff";
-import CustomersPage from "./pages/customers";
-import NotFound from "./pages/not-found";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Layout } from "@/components/layout";
+import Dashboard from "@/pages/dashboard";
+import OrdersPage from "@/pages/orders";
+import TablesPage from "@/pages/tables";
+import MenuPage from "@/pages/menu";
+import InventoryPage from "@/pages/inventory";
+import Reports from "@/pages/reports";
+import StaffPage from "@/pages/staff";
+import CustomersPage from "@/pages/customers";
+import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
@@ -35,10 +35,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      {/* <TooltipProvider> */}
-        {/* <Toaster /> */}
+      <TooltipProvider>
+        <Toaster />
         <Router />
-      {/* </TooltipProvider> */}
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }

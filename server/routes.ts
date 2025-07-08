@@ -211,7 +211,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const items = await storage.getInventory();
       res.json(items);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch inventory" });
+      console.error('Inventory API error:', error);
+      res.status(500).json({ message: "Failed to fetch inventory", error: error.message });
     }
   });
 
