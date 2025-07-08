@@ -127,6 +127,7 @@ RestaurantPro is a modern full-stack restaurant management system built with Rea
 - July 08, 2025. Consolidação das APIs serverless: 15 funções → 1 função única (api/index.ts)
 - July 08, 2025. Correção do erro 500 ao criar pedidos - API otimizada para serverless, removidas dependências problemáticas
 - July 08, 2025. Interface melhorada para criação de pedidos - formulário visual em vez de JSON manual
+- July 08, 2025. Migrações do banco criadas - Schema completo com 8 tabelas prontas para Neon Database
 
 ## User Preferences
 
