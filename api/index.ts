@@ -1,5 +1,4 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { DatabaseStorage } from '../server/storage';
 import { 
   insertMenuItemSchema, insertTableSchema, insertOrderSchema, 
   insertInventorySchema, insertStaffSchema, insertCustomerSchema, 
@@ -7,7 +6,28 @@ import {
   updateInventorySchema, updateStaffSchema
 } from '../shared/schema';
 
-const storage = new DatabaseStorage();
+// Import database directly for serverless environment
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import { eq } from 'drizzle-orm';
+import * as schema from '../shared/schema';
+
+// Configure neon for serverless environment
+neonConfig.fetchConnectionCache = true;
+
+let cachedDb: ReturnType<typeof drizzle> | null = null;
+
+function getDb() {
+  if (!cachedDb) {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL must be set');
+    }
+    
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    cachedDb = drizzle({ client: pool, schema });
+  }
+  return cachedDb;
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { method, url } = req;
@@ -16,7 +36,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // Dashboard routes
     if (path === '/api/dashboard/stats' && method === 'GET') {
-      const stats = await storage.getDashboardStats();
+      const db = getDb();
+      const orders = await db.select().from(schema.orders);
+      const tables = await db.select().from(schema.tables);
+      const staff = await db.select().from(schema.staff);
+      const inventory = await db.select().from(schema.inventory);
+      
+      const stats = {
+        dailyRevenue: 0,
+        activeOrders: orders.filter(o => o.status === 'preparing' || o.status === 'pending').length,
+        occupiedTables: tables.filter(t => t.status === 'occupied').length,
+        totalTables: tables.length,
+        staffPresent: staff.filter(s => s.status === 'active').length,
+        totalStaff: staff.length,
+        lowStockItems: inventory.filter(i => i.lowStock).length,
+      };
+      
       return res.status(200).json(stats);
     }
     
@@ -95,14 +130,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const orders = await storage.getOrdersByStatus(status);
         return res.status(200).json(orders);
       }
-      const orders = await storage.getOrders();
+      const db = getDb();
+      const orders = await db.select().from(schema.orders);
       return res.status(200).json(orders);
     }
     
     if (path === '/api/orders' && method === 'POST') {
-      const validatedData = insertOrderSchema.parse(req.body);
-      const order = await storage.createOrder(validatedData);
-      return res.status(201).json(order);
+      try {
+        console.log('Creating order with data:', req.body);
+        
+        // Ensure total is a string for decimal field
+        const bodyData = {
+          ...req.body,
+          total: typeof req.body.total === 'number' ? req.body.total.toString() : req.body.total
+        };
+        
+        const validatedData = insertOrderSchema.parse(bodyData);
+        console.log('Validated data:', validatedData);
+        
+        // Create order directly with database
+        const db = getDb();
+        const [newOrder] = await db.insert(schema.orders).values(validatedData).returning();
+        
+        console.log('Order created:', newOrder);
+        return res.status(201).json(newOrder);
+      } catch (error) {
+        console.error('Error creating order:', error);
+        
+        // More detailed error info
+        if (error instanceof Error) {
+          console.error('Error stack:', error.stack);
+        }
+        
+        return res.status(500).json({ 
+          message: 'Internal server error', 
+          error: error instanceof Error ? error.message : 'Unknown error',
+          details: error instanceof Error ? error.stack : undefined
+        });
+      }
     }
     
     if (path.startsWith('/api/orders/') && method === 'GET') {
