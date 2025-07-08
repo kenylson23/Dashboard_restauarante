@@ -737,4 +737,4 @@ export class DatabaseStorage implements IStorage {
 }
 
 // Use MemStorage for development, DatabaseStorage for production (independent of Replit)
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();

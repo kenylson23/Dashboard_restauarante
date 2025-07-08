@@ -1,14 +1,41 @@
-server/
+# Dependencies
 node_modules/
-.git/
-*.log
+
+# Environment files
 .env
 .env.local
 .env.development
 .env.test
 .env.production
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Git
+.git/
+
+# Build outputs
 dist/
+
+# Replit specific
 .replit
 .replit.nix
 replit.nix
-.gitignore
+
+# Exclude local development files from Vercel deployment
+server/
+client/src/
+shared/
+drizzle.config.ts
+vite.config.ts
+postcss.config.js
+tailwind.config.ts
+tsconfig.json
+migrations/
+
+# Only include what's needed for Vercel
+# api/ - included (serverless functions)
+# dist/public/ - included (frontend build)
