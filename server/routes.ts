@@ -15,7 +15,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stats = await storage.getDashboardStats();
       res.json(stats);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch dashboard stats" });
+      console.error('Dashboard API error:', error);
+      res.status(500).json({ message: "Failed to fetch dashboard stats", error: error.message });
     }
   });
 
@@ -221,7 +222,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const items = await storage.getLowStockItems();
       res.json(items);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch low stock items" });
+      console.error('Low stock API error:', error);
+      res.status(500).json({ message: "Failed to fetch low stock items", error: error.message });
     }
   });
 
