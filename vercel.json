@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd client && NODE_ENV=production npx vite build --outDir ../dist/public",
+  "buildCommand": "NODE_ENV=production npx vite build",
   "outputDirectory": "dist/public",
   "routes": [
     {
