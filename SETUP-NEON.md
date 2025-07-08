@@ -81,9 +81,22 @@ npx drizzle-kit introspect
 - **Compatível com Vercel**: Zero configuração extra
 - **Backups automáticos**
 
+## ✅ Correções Aplicadas para Vercel
+
+### Problema resolvido: Import do schema
+- **Problema:** `api/index.js` não conseguia importar `/shared/schema` no Vercel
+- **Solução:** Criado `api/schema.ts` com cópia local do schema
+- **Resultado:** Imports funcionando corretamente no ambiente serverless
+
+### Configuração WebSocket para Neon
+- Adicionada configuração automática do WebSocket para Node.js
+- Cache de conexão habilitado para melhor performance
+- Compatível com ambiente serverless do Vercel
+
 ## 🆘 Troubleshooting
 Se houver problemas na conexão:
-1. Verifique se a DATABASE_URL está correta
+1. Verifique se a DATABASE_URL está correta no Vercel
 2. Confirme que o projeto Neon está ativo
-3. Teste a conexão localmente primeiro
-4. Verifique os logs no Vercel
+3. Verifique se todas as environment variables estão configuradas
+4. Consulte os logs de deployment no Vercel
+5. A API local está funcionando: ✅ testada com sucesso

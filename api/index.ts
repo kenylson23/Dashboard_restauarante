@@ -4,16 +4,21 @@ import {
   insertInventorySchema, insertStaffSchema, insertCustomerSchema, 
   insertSaleSchema, updateOrderSchema, updateTableSchema, 
   updateInventorySchema, updateStaffSchema
-} from '../shared/schema';
+} from './schema';
 
 // Import database directly for serverless environment
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import { eq } from 'drizzle-orm';
-import * as schema from '../shared/schema';
+import * as schema from './schema';
 
-// Configure neon for serverless environment
+// Configure neon for serverless environment (Vercel compatible)
 neonConfig.fetchConnectionCache = true;
+if (typeof WebSocket === 'undefined') {
+  // For Node.js environment, import ws
+  const ws = require('ws');
+  neonConfig.webSocketConstructor = ws;
+}
 
 let cachedDb: ReturnType<typeof drizzle> | null = null;
 
