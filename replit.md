@@ -133,6 +133,7 @@ RestaurantPro is a modern full-stack restaurant management system built with Rea
 - July 08, 2025. Problema das referências ao 'storage' TOTALMENTE RESOLVIDO - API reescrita com Drizzle ORM direto
 - July 08, 2025. .vercelignore atualizado para excluir arquivos locais problemáticos do deploy
 - July 08, 2025. BUILD DO FRONTEND FUNCIONANDO - Versão simplificada buildada com sucesso para deploy
+- July 08, 2025. Configuração de build do Vercel corrigida - vite.config.prod.ts criado para deploy
 
 ## User Preferences
 
