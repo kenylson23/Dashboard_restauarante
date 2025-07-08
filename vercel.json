@@ -2,7 +2,7 @@
   "version": 2,
   "functions": {
     "api/**/*.ts": {
-      "runtime": "@vercel/node"
+      "runtime": "nodejs18.x"
     }
   },
   "builds": [
@@ -21,7 +21,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/dist/public/$1"
+      "dest": "/$1"
     }
   ],
   "env": {

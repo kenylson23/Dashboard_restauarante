@@ -692,5 +692,5 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Use MemStorage for now (will switch to DatabaseStorage in Vercel)
+// Use MemStorage for development, DatabaseStorage for production (independent of Replit)
 export const storage = new MemStorage();
