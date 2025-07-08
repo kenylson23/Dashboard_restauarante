@@ -123,6 +123,7 @@ RestaurantPro is a modern full-stack restaurant management system built with Rea
 
 - July 07, 2025. Initial setup
 - July 07, 2025. Preparação completa para deploy no Vercel - APIs serverless, banco PostgreSQL, build configurado
+- July 08, 2025. Correção do erro de build no Vercel - buildCommand alterado para 'vite build'
 
 ## User Preferences
 
