@@ -40,7 +40,12 @@ export function OrderModal({ order, isOpen, onClose }: OrderModalProps) {
       tableNumber: order?.tableNumber || 1,
       status: order?.status as any || "pending",
       customerName: order?.customerName || "",
-      items: order?.items || JSON.stringify([]),
+      items: order?.items || JSON.stringify([{
+        "menuItemId": 1,
+        "name": "Item exemplo",
+        "quantity": 1,
+        "price": 10.00
+      }]),
       total: order?.total || "0.00",
       notes: order?.notes || "",
     },
@@ -93,6 +98,18 @@ export function OrderModal({ order, isOpen, onClose }: OrderModalProps) {
   });
 
   const onSubmit = (data: OrderFormData) => {
+    // Validate that items is valid JSON
+    try {
+      JSON.parse(data.items);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "O campo 'Itens' deve conter um JSON válido",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (order) {
       updateOrderMutation.mutate(data);
     } else {

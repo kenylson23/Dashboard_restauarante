@@ -204,7 +204,13 @@ export default function OrdersPage() {
       {/* Orders Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredOrders.map((order) => {
-          const orderItems: OrderItem[] = JSON.parse(order.items);
+          let orderItems: OrderItem[] = [];
+          try {
+            orderItems = JSON.parse(order.items);
+          } catch (error) {
+            console.error('Error parsing order items:', error, order.items);
+            orderItems = [];
+          }
           
           return (
             <Card key={order.id} className="cursor-pointer hover:shadow-md transition-shadow">
