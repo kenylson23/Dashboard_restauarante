@@ -16,6 +16,9 @@ import { useToast } from "@/hooks/use-toast";
 const orderFormSchema = z.object({
   tableNumber: z.number().min(1, "Número da mesa é obrigatório"),
   status: z.enum(["pending", "preparing", "ready", "served", "cancelled"]),
+  customerName: z.string().optional(),
+  items: z.string().min(1, "Itens são obrigatórios"),
+  total: z.string().min(1, "Total é obrigatório"),
   notes: z.string().optional(),
 });
 
@@ -36,7 +39,33 @@ export function OrderModal({ order, isOpen, onClose }: OrderModalProps) {
     defaultValues: {
       tableNumber: order?.tableNumber || 1,
       status: order?.status as any || "pending",
+      customerName: order?.customerName || "",
+      items: order?.items || JSON.stringify([]),
+      total: order?.total || "0.00",
       notes: order?.notes || "",
+    },
+  });
+
+  const createOrderMutation = useMutation({
+    mutationFn: async (data: OrderFormData) => {
+      return apiRequest("POST", `/api/orders`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      toast({
+        title: "Pedido criado",
+        description: "Novo pedido foi criado com sucesso",
+      });
+      form.reset();
+      onClose();
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível criar o pedido",
+        variant: "destructive",
+      });
     },
   });
 
@@ -47,6 +76,7 @@ export function OrderModal({ order, isOpen, onClose }: OrderModalProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       toast({
         title: "Pedido atualizado",
         description: "O pedido foi atualizado com sucesso.",
@@ -63,7 +93,11 @@ export function OrderModal({ order, isOpen, onClose }: OrderModalProps) {
   });
 
   const onSubmit = (data: OrderFormData) => {
-    updateOrderMutation.mutate(data);
+    if (order) {
+      updateOrderMutation.mutate(data);
+    } else {
+      createOrderMutation.mutate(data);
+    }
   };
 
   return (
@@ -94,6 +128,61 @@ export function OrderModal({ order, isOpen, onClose }: OrderModalProps) {
               )}
             />
             
+            <FormField
+              control={form.control}
+              name="customerName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome do Cliente</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Nome do cliente (opcional)" 
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="items"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Itens (JSON)</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder='[{"menuItemId": 1, "name": "Item", "quantity": 1, "price": 10.99}]'
+                      {...field}
+                      rows={3}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="total"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Total</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00" 
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="status"
@@ -141,8 +230,8 @@ export function OrderModal({ order, isOpen, onClose }: OrderModalProps) {
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={updateOrderMutation.isPending}>
-                {updateOrderMutation.isPending ? "Salvando..." : "Salvar"}
+              <Button type="submit" disabled={updateOrderMutation.isPending || createOrderMutation.isPending}>
+                {(updateOrderMutation.isPending || createOrderMutation.isPending) ? "Salvando..." : order ? "Atualizar" : "Criar Pedido"}
               </Button>
             </DialogFooter>
           </form>
