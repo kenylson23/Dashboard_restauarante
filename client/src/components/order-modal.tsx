@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Trash2, Plus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Order } from "@shared/schema";
@@ -34,18 +35,29 @@ export function OrderModal({ order, isOpen, onClose }: OrderModalProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
+  const [orderItems, setOrderItems] = useState<OrderItem[]>(() => {
+    if (order?.items) {
+      try {
+        return JSON.parse(order.items);
+      } catch {
+        return [];
+      }
+    }
+    return [{
+      menuItemId: 1,
+      name: "Item exemplo",
+      quantity: 1,
+      price: 10.00
+    }];
+  });
+  
   const form = useForm<OrderFormData>({
     resolver: zodResolver(orderFormSchema),
     defaultValues: {
       tableNumber: order?.tableNumber || 1,
       status: order?.status as any || "pending",
       customerName: order?.customerName || "",
-      items: order?.items || JSON.stringify([{
-        "menuItemId": 1,
-        "name": "Item exemplo",
-        "quantity": 1,
-        "price": 10.00
-      }]),
+      items: order?.items || JSON.stringify(orderItems),
       total: order?.total || "0.00",
       notes: order?.notes || "",
     },
@@ -96,6 +108,41 @@ export function OrderModal({ order, isOpen, onClose }: OrderModalProps) {
       });
     },
   });
+
+  const addItem = () => {
+    const newItem: OrderItem = {
+      menuItemId: 1,
+      name: "Novo item",
+      quantity: 1,
+      price: 0
+    };
+    setOrderItems([...orderItems, newItem]);
+    updateItemsField();
+  };
+
+  const removeItem = (index: number) => {
+    const newItems = orderItems.filter((_, i) => i !== index);
+    setOrderItems(newItems);
+    updateItemsField(newItems);
+  };
+
+  const updateItem = (index: number, field: keyof OrderItem, value: any) => {
+    const newItems = [...orderItems];
+    newItems[index] = { ...newItems[index], [field]: value };
+    setOrderItems(newItems);
+    updateItemsField(newItems);
+  };
+
+  const updateItemsField = (items = orderItems) => {
+    form.setValue("items", JSON.stringify(items));
+    const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    form.setValue("total", total.toFixed(2));
+  };
+
+  // Update form when orderItems change
+  useEffect(() => {
+    updateItemsField();
+  }, [orderItems]);
 
   const onSubmit = (data: OrderFormData) => {
     // Validate that items is valid JSON
@@ -162,37 +209,88 @@ export function OrderModal({ order, isOpen, onClose }: OrderModalProps) {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="items"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Itens (JSON)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder='[{"menuItemId": 1, "name": "Item", "quantity": 1, "price": 10.99}]'
-                      {...field}
-                      rows={3}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <FormLabel>Itens do Pedido</FormLabel>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addItem}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Item
+                </Button>
+              </div>
+              
+              <div className="space-y-3">
+                {orderItems.map((item, index) => (
+                  <div key={index} className="flex gap-2 items-end p-3 border rounded-lg">
+                    <div className="flex-1">
+                      <label className="text-sm font-medium">Nome</label>
+                      <Input
+                        value={item.name}
+                        onChange={(e) => updateItem(index, 'name', e.target.value)}
+                        placeholder="Nome do item"
+                      />
+                    </div>
+                    <div className="w-20">
+                      <label className="text-sm font-medium">Qtd</label>
+                      <Input
+                        type="number"
+                        value={item.quantity}
+                        onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                        min="1"
+                      />
+                    </div>
+                    <div className="w-24">
+                      <label className="text-sm font-medium">Preço</label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={item.price}
+                        onChange={(e) => updateItem(index, 'price', parseFloat(e.target.value) || 0)}
+                        min="0"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeItem(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="items"
+                render={({ field }) => (
+                  <FormItem className="hidden">
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
               name="total"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Total</FormLabel>
+                  <FormLabel>Total (calculado automaticamente)</FormLabel>
                   <FormControl>
                     <Input 
-                      type="number"
-                      step="0.01"
+                      type="text"
                       placeholder="0.00" 
                       {...field}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      readOnly
+                      className="bg-gray-50"
                     />
                   </FormControl>
                   <FormMessage />
