@@ -54,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         totalTables: tables.length,
         staffPresent: staff.filter(s => s.status === 'active').length,
         totalStaff: staff.length,
-        lowStockItems: inventory.filter(i => i.lowStock).length,
+        lowStockItems: inventory.filter(i => parseFloat(i.currentStock) < parseFloat(i.minThreshold)).length,
       };
       
       return res.status(200).json(stats);
