@@ -6,7 +6,7 @@ import {
   insertInventorySchema, insertStaffSchema, insertCustomerSchema, 
   insertSaleSchema, updateOrderSchema, updateTableSchema, 
   updateInventorySchema, updateStaffSchema
-} from "@shared/schema";
+} from "../shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard routes
