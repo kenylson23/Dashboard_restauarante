@@ -4,13 +4,13 @@ import {
   insertInventorySchema, insertStaffSchema, insertCustomerSchema, 
   insertSaleSchema, updateOrderSchema, updateTableSchema, 
   updateInventorySchema, updateStaffSchema
-} from './schema';
+} from '../shared/schema';
 
 // Import database directly for serverless environment
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import { eq } from 'drizzle-orm';
-import * as schema from './schema';
+import * as schema from '../shared/schema';
 
 // Configure neon for serverless environment (Vercel compatible)
 neonConfig.fetchConnectionCache = true;
