@@ -131,6 +131,7 @@ RestaurantPro is a modern full-stack restaurant management system built with Rea
 - July 08, 2025. Conexão com Neon Database configurada e testada - API funcionando localmente
 - July 08, 2025. Corrigido problema de import do schema para Vercel - API totalmente independente
 - July 08, 2025. MIGRAÇÃO NEON DATABASE CONCLUÍDA - Sistema local e Vercel usando banco PostgreSQL real
+- July 09, 2025. Resolvido conflito Replit/Neon - Sistema conectado ao painel externo do usuário (ep-morning-dew-a4gdfkje)
 
 ## User Preferences
 
